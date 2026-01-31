@@ -17,14 +17,22 @@ import { useState } from "react";
 import MarketingDashboard from "@/components/teams/MarketingDashboard";
 import SalesDashboard from "@/components/teams/SalesDashboard";
 import ProductDashboard from "@/components/teams/ProductDashboard";
+import CreateRequestModal from "@/components/CreateRequestModal";
+import { MarketingRequest } from "@/types";
 
 interface DashboardClientProps {
   team: Team;
+  requests: MarketingRequest[];
 }
 
-export default function DashboardClient({ team }: DashboardClientProps) {
+export default function DashboardClient({
+  team,
+  requests,
+}: DashboardClientProps) {
+  console.log("DashboardClient props:", { team, requests });
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleLogout = async () => {
     await logoutAction();
@@ -35,21 +43,26 @@ export default function DashboardClient({ team }: DashboardClientProps) {
     const role = team.role.toLowerCase();
 
     if (role.includes("marketing") || role === "admin") {
-      return <MarketingDashboard />;
+      return <MarketingDashboard requests={requests} team={team} />;
     }
     if (role.includes("sales")) {
-      return <SalesDashboard />;
+      return <SalesDashboard requests={requests} team={team} />;
     }
     if (role.includes("product")) {
-      return <ProductDashboard />;
+      return <ProductDashboard requests={requests} team={team} />;
     }
 
     // Default to a basic view or Marketing if unknown
-    return <MarketingDashboard />;
+    return <MarketingDashboard requests={requests} team={team} />;
   };
 
   return (
     <div className="flex min-h-screen bg-[#F9FAFB] font-sans">
+      <CreateRequestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        team={team}
+      />
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 z-20">
         <div className="p-6">
@@ -128,7 +141,10 @@ export default function DashboardClient({ team }: DashboardClientProps) {
               <Bell size={22} />
               <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
             </button>
-            <button className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-2xl hover:bg-gray-800 text-sm font-black transition-all shadow-xl shadow-black/10 active:scale-95">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-2xl hover:bg-gray-800 text-sm font-black transition-all shadow-xl shadow-black/10 active:scale-95 text-nowrap"
+            >
               <Plus size={20} />
               Create New
             </button>

@@ -2,8 +2,20 @@
 
 import { Target, Users, Zap, FileText } from "lucide-react";
 import StatCard from "@/components/StatCard";
+import RequestQueue from "@/components/RequestQueue";
+import { MarketingRequest, Team } from "@/types";
 
-export default function SalesDashboard() {
+interface SalesDashboardProps {
+  requests: MarketingRequest[];
+  team: Team;
+}
+
+export default function SalesDashboard({
+  requests,
+  team,
+}: SalesDashboardProps) {
+  const pending = requests.filter((r) => r.status === "pending").length;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -16,8 +28,8 @@ export default function SalesDashboard() {
         />
         <StatCard
           title="Collateral Requests"
-          value="7"
-          trend="3 urgent"
+          value={pending.toString()}
+          trend="Currently pending"
           icon={<FileText className="text-orange-500" size={20} />}
           bgColor="bg-orange-50"
         />
@@ -37,12 +49,15 @@ export default function SalesDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white border border-gray-100 rounded-2xl shadow-sm p-8">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">
-            Recent Sales Requests
-          </h2>
+        <div className="lg:col-span-2">
+          <RequestQueue
+            requests={requests}
+            team={team}
+            title="Recent Sales Requests"
+            description="Track your department's collateral and campaign requests."
+          />
         </div>
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-8">
+        <div className="bg-white border border-gray-100 rounded-[32px] shadow-sm p-8">
           <h2 className="text-lg font-bold text-gray-900 mb-6">
             Sales Resources
           </h2>
@@ -55,7 +70,7 @@ export default function SalesDashboard() {
             ].map((item) => (
               <li
                 key={item}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl text-sm font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
               >
                 <FileText size={16} className="text-gray-400" />
                 {item}

@@ -1,35 +1,41 @@
 import { createClient } from "@/lib/supabase";
-import { Team } from "@/types";
+import { Team, TeamRole } from "@/types";
 import { cookies } from "next/headers";
 
 export async function verifyTeamCode(teamCode: string, userCode: string) {
   const supabase = await createClient();
 
-  const { data: team, error: teamError } = await supabase
+  const { data: user, error: userError } = await supabase
     .from("users")
-    .select("id, name")
+    .select("id, name, role, team_code, user_code")
     .eq("team_code", teamCode)
     .eq("user_code", userCode)
     .single();
 
-  if (teamError || !team) {
-    console.error("Team not found", teamError);
-    return { success: false, error: "Invalid Team Code" };
+  console.log("verifyTeamCode attempt:", { teamCode, userCode });
+
+  if (userError || !user) {
+    console.error("Login database check failed:", userError || "No user found");
+    return { success: false, error: "Invalid Team or User Code" };
   }
 
-  // TODO: Verify userCode against a users table or specific logic
-  // For now, we accept any non-empty userCode if the teamCode is valid
+  console.log("User found:", user);
 
-  // Polyfill role until it's in the DB
-  const role = team.name;
-  const teamWithRole: Team = { ...team, code: teamCode, role };
+  const team: Team = {
+    id: user.id,
+    name: user.name || "User",
+    code: user.team_code || teamCode,
+    userCode: user.user_code || userCode,
+    role: user.role as TeamRole,
+  };
 
   // 2. Sign in Anonymously and store the team info in user_metadata
-  const { data, error: authError } = await supabase.auth.signInAnonymously({
+  const { error: authError } = await supabase.auth.signInAnonymously({
     options: {
       data: {
         team_id: team.id,
         team_name: team.name,
+        role: team.role,
       },
     },
   });
@@ -39,7 +45,7 @@ export async function verifyTeamCode(teamCode: string, userCode: string) {
     return { success: false, error: authError.message };
   }
 
-  return { success: true, team: teamWithRole };
+  return { success: true, team };
 }
 
 export async function getCurrentTeam(): Promise<Team | null> {
@@ -49,18 +55,28 @@ export async function getCurrentTeam(): Promise<Team | null> {
   if (!teamId) return null;
 
   const supabase = await createClient();
-  const { data: team } = await supabase
+  const { data: user } = await supabase
     .from("users")
-    .select("*")
+    .select("id, name, role, team_code, user_code")
     .eq("id", teamId)
     .single();
 
-  if (!team) return null;
+  console.log("getCurrentTeam check for ID:", teamId);
 
-  // Polyfill role
-  const role = team.role;
+  if (!user) {
+    console.error("No user found in session check for ID:", teamId);
+    return null;
+  }
 
-  return { ...team, role } as Team;
+  console.log("User session validated:", user);
+
+  return {
+    id: user.id,
+    name: user.name || "User",
+    code: user.team_code || "",
+    userCode: user.user_code || "",
+    role: user.role as TeamRole,
+  };
 }
 
 export async function logout() {

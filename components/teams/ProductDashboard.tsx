@@ -2,8 +2,20 @@
 
 import { Package, Rocket, Layers, BarChart3 } from "lucide-react";
 import StatCard from "@/components/StatCard";
+import RequestQueue from "@/components/RequestQueue";
+import { MarketingRequest, Team } from "@/types";
 
-export default function ProductDashboard() {
+interface ProductDashboardProps {
+  requests: MarketingRequest[];
+  team: Team;
+}
+
+export default function ProductDashboard({
+  requests,
+  team,
+}: ProductDashboardProps) {
+  const pending = requests.filter((r) => r.status === "pending").length;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -15,9 +27,9 @@ export default function ProductDashboard() {
           bgColor="bg-purple-50"
         />
         <StatCard
-          title="Feature Requests"
-          value="18"
-          trend="+4 since Monday"
+          title="Active Requests"
+          value={pending.toString()}
+          trend="Pending review"
           icon={<Layers className="text-blue-500" size={20} />}
           bgColor="bg-blue-50"
         />
@@ -37,19 +49,12 @@ export default function ProductDashboard() {
         />
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Product Assets</h2>
-            <p className="text-sm text-gray-500">
-              Manage assets and requests for upcoming product launches.
-            </p>
-          </div>
-          <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
-            Manage Folders
-          </button>
-        </div>
-      </div>
+      <RequestQueue
+        requests={requests}
+        team={team}
+        title="Product Launch Requests"
+        description="Manage assets and requests for upcoming product launches."
+      />
     </div>
   );
 }

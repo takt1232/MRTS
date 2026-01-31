@@ -8,11 +8,14 @@ export async function loginAction(prevState: any, formData: FormData) {
   const teamCode = formData.get("team_code") as string;
   const userCode = formData.get("user_code") as string;
 
+  console.log("loginAction called with:", { teamCode, userCode });
+
   if (!teamCode || !userCode) {
     return { error: "Team code and User code are required" };
   }
 
   const result = await verifyTeamCode(teamCode, userCode);
+  console.log("verifyTeamCode result:", result);
 
   if (!result.success) {
     return { error: result.error };
