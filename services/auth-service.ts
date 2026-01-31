@@ -2,35 +2,31 @@ import { createClient } from "@/lib/supabase";
 import { Team } from "@/types";
 import { cookies } from "next/headers";
 
-export async function verifyTeamCode(
-  code: string,
-): Promise<{ success: boolean; error?: string }> {
+export async function verifyTeamCode(code: string) {
   const supabase = await createClient();
 
-  // 1. Validate code against DB
-  const { data: team, error } = await supabase
+  // 1. Verify the code exists in your 'teams' table
+  const { data: team, error: teamError } = await supabase
     .from("teams")
-    .select("*")
+    .select("id, name")
     .eq("code", code)
     .single();
 
-  console.log(error);
-
-  if (error || !team) {
+  if (teamError || !team) {
     return { success: false, error: "Invalid Team Code" };
   }
 
-  // 2. Create Session (using cookies)
-  // implementing a simple cookie-based session for the team
-  const cookieStore = await cookies();
-
-  // In a real app, you might sign a JWT here.
-  // For this pattern, we'll store the team_id and role securely enough for the demo.
-  cookieStore.set("mrts_team_id", team.id, { httpOnly: true, secure: true });
-  cookieStore.set("mrts_team_role", team.role, {
-    httpOnly: true,
-    secure: true,
+  // 2. Sign in Anonymously and store the team info in user_metadata
+  const { data, error: authError } = await supabase.auth.signInAnonymously({
+    options: {
+      data: {
+        team_id: team.id,
+        team_name: team.name,
+      },
+    },
   });
+
+  if (authError) return { success: false, error: authError.message };
 
   return { success: true };
 }
