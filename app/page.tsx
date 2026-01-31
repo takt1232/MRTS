@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { loginAction } from "./actions";
+import { loginAction } from "./(auth)/actions";
 
 export default function LoginPage() {
   const [state, action, isPending] = useActionState(loginAction, undefined);
@@ -19,18 +19,37 @@ export default function LoginPage() {
         </div>
 
         <form action={action} className="mt-8 space-y-6">
-          <div className="-space-y-px rounded-md shadow-sm">
+          <div className="space-y-4">
             <div>
-              <label htmlFor="code" className="sr-only">
+              <label
+                htmlFor="team_code"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Team Code
               </label>
               <input
-                id="code"
-                name="code"
+                id="team_code"
+                name="team_code"
                 type="text"
                 required
-                className="relative block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                placeholder="e.g. SALES-2026"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                placeholder="e.g. SALES-TEAM"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="user_code"
+                className="block text-sm font-medium text-gray-700"
+              >
+                User Code
+              </label>
+              <input
+                id="user_code"
+                name="user_code"
+                type="text"
+                required
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                placeholder="Enter your user code"
               />
             </div>
           </div>

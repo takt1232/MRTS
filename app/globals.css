@@ -6,6 +6,8 @@
 }
 
 @theme inline {
+  --font-sans: "satoshi", ui-sans-serif, system-ui;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
